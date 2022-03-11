@@ -1,8 +1,8 @@
-import gym
-import numpy as np
-import cv2
 from collections import deque
 
+import cv2
+import gym
+import numpy as np
 
 
 class MaxAndSkipEnv(gym.Wrapper):
@@ -45,6 +45,7 @@ class MaxAndSkipEnv(gym.Wrapper):
     def reset(self, **kwargs):
         return self.env.reset(**kwargs)
 
+
 class FrameDownSample(gym.ObservationWrapper):
     def __init__(self, env):
         """
@@ -55,7 +56,7 @@ class FrameDownSample(gym.ObservationWrapper):
         self.width = 84
         self.height = 84
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(self.height, self.width, 1),
-                                            dtype=env.observation_space.dtype)
+                                                dtype=env.observation_space.dtype)
 
     def observation(self, frame):
         """
@@ -67,6 +68,7 @@ class FrameDownSample(gym.ObservationWrapper):
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
         return frame[:, :, None]
 
+
 class ScaledFloatFrame(gym.ObservationWrapper):
     def __init__(self, env):
         gym.ObservationWrapper.__init__(self, env)
@@ -76,6 +78,7 @@ class ScaledFloatFrame(gym.ObservationWrapper):
         # careful! This undoes the memory optimization, use
         # with smaller replay buffers only.
         return np.array(observation).astype(np.float32) / 255.0
+
 
 class LazyFrameStack(gym.Wrapper):
     def __init__(self, env, n_frames):
@@ -93,7 +96,7 @@ class LazyFrameStack(gym.Wrapper):
         self.frames = deque([], maxlen=n_frames)
         shp = env.observation_space.shape
         self.observation_space = gym.spaces.Box(low=0, high=1.0, shape=(shp[0], shp[1], shp[2] * n_frames),
-                                            dtype=env.observation_space.dtype)
+                                                dtype=env.observation_space.dtype)
 
     def reset(self, **kwargs):
         obs = self.env.reset(**kwargs)
@@ -109,6 +112,7 @@ class LazyFrameStack(gym.Wrapper):
     def _get_ob(self):
         assert len(self.frames) == self.n_frames
         return LazyFrames(list(self.frames))
+
 
 class LazyFrames(object):
     def __init__(self, frames):
@@ -140,6 +144,7 @@ class LazyFrames(object):
     def __getitem__(self, i):
         return self._force()[i]
 
+
 class CustomReward(gym.Wrapper):
     def __init__(self, env):
         gym.Wrapper.__init__(self, env)
@@ -161,6 +166,7 @@ class CustomReward(gym.Wrapper):
     # rewards for coins
     # rewards for going fast
     # multiple instances 
+
 
 class FireResetEnv(gym.Wrapper):
     def __init__(self, env):
@@ -186,15 +192,13 @@ class FireResetEnv(gym.Wrapper):
         return self.env.step(action)
 
 
-
-
 class ReplyBuffer:
     def __init__(self, memory_size=20000):
         self.state = deque(maxlen=memory_size)
         self.action = deque(maxlen=memory_size)
         self.reward = deque(maxlen=memory_size)
         self.next_state = deque(maxlen=memory_size)
-        self.done= deque(maxlen=memory_size)
+        self.done = deque(maxlen=memory_size)
 
     def append(self, state, action, reward, next_state, done):
         self.state.append(state)

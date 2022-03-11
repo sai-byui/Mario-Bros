@@ -1,31 +1,35 @@
 import os
 import random
+
 import gym
 import gym_super_mario_bros.actions as actions
 import numpy as np
 import tensorflow as tf
 from nes_py.wrappers import JoypadSpace
 from tensorflow import keras
-from tensorflow.keras.models import Sequential, clone_model
 from tensorflow.keras.layers import Conv2D, Dense, Flatten
+from tensorflow.keras.models import Sequential, clone_model
 from tensorflow.keras.optimizers import Adam
 
-from wrappers import MaxAndSkipEnv, FireResetEnv, FrameDownSample, ScaledFloatFrame, LazyFrameStack, CustomReward,ReplyBuffer
+from my_wrappers import MaxAndSkipEnv, FireResetEnv, FrameDownSample, ScaledFloatFrame, LazyFrameStack, CustomReward, \
+    ReplyBuffer
 
-# physical_devices = tf.config.list_physical_devices('GPU')
-# try:
-#   tf.config.set_logical_device_configuration(
-#     physical_devices[0],
-#     tf.config.LogicalDeviceConfiguration(memory_limit=4096))
 
-#   logical_devices = tf.config.list_logical_devices('GPU')
-#   assert len(logical_devices) == len(physical_devices) + 1
+physical_devices = tf.config.list_physical_devices('GPU')
+try:
+  tf.config.set_logical_device_configuration(
+    physical_devices[0],
+    tf.config.LogicalDeviceConfiguration(memory_limit=4096))
 
-#   tf.config.set_logical_device_configuration(
-#     physical_devices[0],
-#     tf.config.LogicalDeviceConfiguration(memory_limit=4096))
-# except:
-#   pass
+  logical_devices = tf.config.list_logical_devices('GPU')
+  assert len(logical_devices) == len(physical_devices) + 1
+
+  tf.config.set_logical_device_configuration(
+    physical_devices[0],
+    tf.config.LogicalDeviceConfiguration(memory_limit=4096))
+except:
+  pass
+
 
 def wrap_nes(env_id, action_space):
     """
@@ -61,7 +65,7 @@ class Agent:
         self.gamma = 0.99  # discount rate
         self.epsilon = 1  # exploration rate
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.9999
+        self.epsilon_decay = 0.99
         self.learning_rate = 0.0001
         self.model = self._build_model()
         self.target_model = self._build_model()
@@ -134,17 +138,17 @@ if __name__ == "__main__":
     """
     Main program
     """
-    monitor = True
+    monitors = True
 
     # Initializes the environment
-    env = wrap_nes("SuperMarioBros-1-1-v0", actions.SIMPLE_MOVEMENT)
+    env = wrap_nes("SuperMarioBros-1-2-v0", actions.SIMPLE_MOVEMENT)
 
     # Records the environment
-    if monitor:
+    if monitors:
         env = gym.wrappers.Monitor(env, "recording", video_callable=lambda episode_id: True, force=True)
 
     # Defines training related constants
-    num_episodes = 50000
+    num_episodes = 500
     num_episode_steps = env.spec.max_episode_steps  # constant value
     frame_count = 0
     max_reward = 0
@@ -169,8 +173,7 @@ if __name__ == "__main__":
         for episode_step in range(num_episode_steps):
             # Renders the screen after new environment observation
 
-            env.render(mode="human")
-
+            # env.render(mode="human")
 
             # Gets a new action
             action = agent.act(state)
