@@ -155,6 +155,12 @@ class CustomReward(gym.Wrapper):
             else:
                 reward -= 50.0
         return state, reward / 10.0, done, info
+    # Frame based start to end location rewards
+    # for every 3 jumps (height or jump action) punish
+    # if you dont move for 20 states that end or punish
+    # rewards for coins
+    # rewards for going fast
+    # multiple instances 
 
 class FireResetEnv(gym.Wrapper):
     def __init__(self, env):

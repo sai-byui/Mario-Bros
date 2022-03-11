@@ -12,20 +12,20 @@ from tensorflow.keras.optimizers import Adam
 
 from wrappers import MaxAndSkipEnv, FireResetEnv, FrameDownSample, ScaledFloatFrame, LazyFrameStack, CustomReward,ReplyBuffer
 
-physical_devices = tf.config.list_physical_devices('GPU')
-try:
-  tf.config.set_logical_device_configuration(
-    physical_devices[0],
-    tf.config.LogicalDeviceConfiguration(memory_limit=4096))
+# physical_devices = tf.config.list_physical_devices('GPU')
+# try:
+#   tf.config.set_logical_device_configuration(
+#     physical_devices[0],
+#     tf.config.LogicalDeviceConfiguration(memory_limit=4096))
 
-  logical_devices = tf.config.list_logical_devices('GPU')
-  assert len(logical_devices) == len(physical_devices) + 1
+#   logical_devices = tf.config.list_logical_devices('GPU')
+#   assert len(logical_devices) == len(physical_devices) + 1
 
-  tf.config.set_logical_device_configuration(
-    physical_devices[0],
-    tf.config.LogicalDeviceConfiguration(memory_limit=4096))
-except:
-  pass
+#   tf.config.set_logical_device_configuration(
+#     physical_devices[0],
+#     tf.config.LogicalDeviceConfiguration(memory_limit=4096))
+# except:
+#   pass
 
 def wrap_nes(env_id, action_space):
     """
