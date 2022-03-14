@@ -10,7 +10,7 @@ from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, Dense, Flatten
 from tensorflow.keras.models import Sequential, clone_model
 from tensorflow.keras.optimizers import Adam
-
+from keras.layers import LeakyReLU
 from my_wrappers import MaxAndSkipEnv, FireResetEnv, FrameDownSample, ScaledFloatFrame, LazyFrameStack, CustomReward, \
     ReplyBuffer
 
@@ -64,20 +64,19 @@ class Agent:
         self.tau = 1000
         self.gamma = 0.99  # discount rate
         self.epsilon = 1  # exploration rate
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.99
-        self.learning_rate = 0.0001
+        self.epsilon_min = 0.05
+        self.epsilon_decay = 0.9994
+        self.learning_rate = 0.0003
         self.model = self._build_model()
         self.target_model = self._build_model()
         self.target_model.set_weights(self.model.get_weights())
 
     def _build_model(self):
         model = Sequential()
-        model.add(Conv2D(32, (8, 8), strides=(4, 4), activation='relu', input_shape=self.observation_shape))
-        model.add(Conv2D(64, (4, 4), strides=(2, 2), activation='relu'))
-        model.add(Conv2D(64, (3, 3), strides=(1, 1), activation='relu'))
+        model.add(Conv2D(32, (3, 3), strides=(4, 4), activation=LeakyReLU(alpha=0.05), input_shape=self.observation_shape))
+        model.add(Conv2D(64, (3, 3), strides=(2, 2), activation=LeakyReLU(alpha=0.05)))
         model.add(Flatten())
-        model.add(Dense(512, activation='relu', kernel_initializer='random_uniform'))
+        model.add(Dense(512, activation=LeakyReLU(alpha=0.05), kernel_initializer='random_uniform'))
         model.add(Dense(self.action_size, activation='softmax'))
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
@@ -148,7 +147,7 @@ if __name__ == "__main__":
         env = gym.wrappers.Monitor(env, "recording", video_callable=lambda episode_id: True, force=True)
 
     # Defines training related constants
-    num_episodes = 500
+    num_episodes = 50000
     num_episode_steps = env.spec.max_episode_steps  # constant value
     frame_count = 0
     max_reward = 0
