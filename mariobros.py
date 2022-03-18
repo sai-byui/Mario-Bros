@@ -10,7 +10,7 @@ from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, Dense, Flatten
 from tensorflow.keras.models import Sequential, clone_model
 from tensorflow.keras.optimizers import Adam
-from keras.layers import LeakyReLU
+from tensorflow.keras.layers import LeakyReLU
 from my_wrappers import MaxAndSkipEnv, FireResetEnv, FrameDownSample, ScaledFloatFrame, LazyFrameStack, CustomReward, \
     ReplyBuffer
 
