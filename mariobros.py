@@ -15,20 +15,20 @@ from my_wrappers import MaxAndSkipEnv, FireResetEnv, FrameDownSample, ScaledFloa
     ReplyBuffer
 
 
-physical_devices = tf.config.list_physical_devices('GPU')
-try:
-  tf.config.set_logical_device_configuration(
-    physical_devices[0],
-    tf.config.LogicalDeviceConfiguration(memory_limit=4096))
-
-  logical_devices = tf.config.list_logical_devices('GPU')
-  assert len(logical_devices) == len(physical_devices) + 1
-
-  tf.config.set_logical_device_configuration(
-    physical_devices[0],
-    tf.config.LogicalDeviceConfiguration(memory_limit=4096))
-except:
-  pass
+# physical_devices = tf.config.list_physical_devices('GPU')
+# try:
+#   tf.config.set_logical_device_configuration(
+#     physical_devices[0],
+#     tf.config.LogicalDeviceConfiguration(memory_limit=4096))
+#
+#   logical_devices = tf.config.list_logical_devices('GPU')
+#   assert len(logical_devices) == len(physical_devices) + 1
+#
+#   tf.config.set_logical_device_configuration(
+#     physical_devices[0],
+#     tf.config.LogicalDeviceConfiguration(memory_limit=4096))
+# except:
+#   pass
 
 
 def wrap_nes(env_id, action_space):
@@ -66,13 +66,15 @@ class Agent:
         self.epsilon = 1  # exploration rate
         self.epsilon_min = 0.05
         self.epsilon_decay = 0.9994
-        self.learning_rate = 0.0003
+        self.learning_rate = 0.005
         self.model = self._build_model()
         self.target_model = self._build_model()
         self.target_model.set_weights(self.model.get_weights())
 
     def _build_model(self):
         model = Sequential()
+        print('observe',self.observation_shape)
+        print(('numpy redo',np.reshape(env.reset(), (1,) + env.observation_space.shape)))
         model.add(Conv2D(32, (3, 3), strides=(4, 4), activation=LeakyReLU(alpha=0.05), input_shape=self.observation_shape))
         model.add(Conv2D(64, (3, 3), strides=(2, 2), activation=LeakyReLU(alpha=0.05)))
         model.add(Flatten())
@@ -92,6 +94,9 @@ class Agent:
         if random.uniform(0, 1) < self.epsilon:
             return random.randrange(self.action_size)
         else:
+            print('self.model.predict(state)',self.model.predict(state))
+            print('self.model.predict(state)[0]',self.model.predict(state)[0])
+            print('np.argmax(self.model.predict(state)[0])',np.argmax(self.model.predict(state)[0]))
             return np.argmax(self.model.predict(state)[0])
 
     def experience_reply(self):
@@ -140,7 +145,7 @@ if __name__ == "__main__":
     monitors = True
 
     # Initializes the environment
-    env = wrap_nes("SuperMarioBros-1-2-v0", actions.SIMPLE_MOVEMENT)
+    env = wrap_nes("SuperMarioBros-1-1-v0", actions.SIMPLE_MOVEMENT)
 
     # Records the environment
     if monitors:
